@@ -240,6 +240,7 @@
 					objects.push( voxel );
 					voxels.push(voxel)
 					scene.add( voxel );
+					
 					cubeMap[point.key] = voxel
 				}
 				
@@ -355,25 +356,31 @@
 
 			}
 
+			var step = new THREE.Vector3()
+			var downOne = new THREE.Vector3(0,-1,0)
 			function moveCube2Surface(){
-				for (var i=0;i<points.length-1;i++){
+				var m = points.length-1
+				var yy = 0
+				for (var i=0;i<m;i++){
 					var point = points[i]
 		        	var voxel = cubeMap[point.key]
-		        	if(voxel.userData!=true){
-		         		voxel.position.add(new THREE.Vector3(0,-1,0))
-
+					yy = Math.abs(voxel.position.y + earth_raduis)
+					if (yy<10) {
+							voxel.visible = true
+						}
+		        	if(voxel.userData != true){
+		         		voxel.position.add(downOne)
 		        	}
-		         	if(Math.abs(voxel.position.y+180)<1||voxel.userData==true){
+		         	if(voxel.userData == true || yy<1){
 		        		var point2d = points2d[i]
 		        		//voxel.position.copy(point2d)
-		        		var step = new THREE.Vector3()
+		        		
 
 
 						step.subVectors(point2d,voxel.position)
 						//非线性运动
-						var stepLen = step.length()
+						//var stepLen = step.length()
 						step.normalize().multiplyScalar(10)
-
 
 			         	voxel.position.add(step)
 			         	voxel.userData = true
