@@ -223,7 +223,6 @@
 				}
 
 			}
-
 			function createEarthShell(points){
 				
 				for(var i=0;i<points.length;i++){
@@ -240,7 +239,6 @@
 					objects.push( voxel );
 					voxels.push(voxel)
 					scene.add( voxel );
-					
 					cubeMap[point.key] = voxel
 				}
 				
@@ -309,10 +307,12 @@
 		
 			var worldTime = 0
 			var alphaStep = 0.01
-			var autoCamera = true
+			var autoCamera = false
 			function animate() {
+				
 				//moveCube()
 				moveCube2Surface()
+				//rotateEarth() 
 				if (autoCamera) {
 					moveCamera()
 					if(worldTime>200){
@@ -337,7 +337,29 @@
 				render();
 				requestAnimationFrame( animate );
 			}	
+			var quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),0.1);
+			var cosA = Math.cos(0.5);
+			var sinA = Math.sin(0.5);
+			
+			function rotateEarth() {
+				var x , y
+				for (var i=0;i<points.length-1;i++){
+					var point = points[i]
+		        	
+		        	var voxel = cubeMap[point.key]
+					if (voxel.visible) {
+						x = voxel.position.x * cosA - voxel.position.z * sinA
+						y = voxel.position.z * cosA + voxel.position.x * sinA
+						voxel.position.x = x
+						voxel.position.z = y
+					}
+					
 
+					//voxel.applyQuaternion(quaternion)
+		         	
+
+		        }
+			}
 			function moveCube(){
 				for (var i=0;i<points.length-1;i++){
 					var point = points[i]
@@ -376,13 +398,8 @@
 		        	}
 		         	if(voxel.userData == true || Math.abs(voxel.position.y + earth_raduis)<1){
 		        		var point2d = points2d[i]
-		        		//voxel.position.copy(point2d)
-		        		
-
 
 						step.subVectors(point2d,voxel.position)
-						//非线性运动
-						//var stepLen = step.length()
 						step.normalize().multiplyScalar(10)
 
 			         	voxel.position.add(step)
@@ -390,6 +407,12 @@
 						voxel.visible = true
 
 		         	}
+					 if (voxel.visible) {
+						x = voxel.position.x * cosA - voxel.position.z * sinA
+						y = voxel.position.z * cosA + voxel.position.x * sinA
+						voxel.position.x = x
+						voxel.position.z = y
+					}
 
 		        }
 		       
