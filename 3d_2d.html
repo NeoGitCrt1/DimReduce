@@ -309,26 +309,31 @@
 		
 			var worldTime = 0
 			var alphaStep = 0.01
+			var autoCamera = true
 			function animate() {
 				//moveCube()
 				moveCube2Surface()
-				//moveCamera()
-				if(worldTime>200){
+				if (autoCamera) {
+					moveCamera()
+					if(worldTime>200){
 					r++
 
-				}
-
-				
-				if(worldTime>400){
-					r+=10
-					alpha+=alphaStep
-					if(alpha>(120*Math.PI)/180|| alpha<(10*Math.PI)/180){
-						alphaStep = -alphaStep
 					}
 
-				}
+					
+					if(worldTime>400){
+						r+=10
+						alpha+=alphaStep
+						if(alpha>(120*Math.PI)/180|| alpha<(10*Math.PI)/180){
+							alphaStep = -alphaStep
+						}
 
-				worldTime++
+					}
+
+					worldTime++
+				}
+				
+				
 				render();
 				requestAnimationFrame( animate );
 			}	
@@ -360,18 +365,16 @@
 			var downOne = new THREE.Vector3(0,-1,0)
 			function moveCube2Surface(){
 				var m = points.length-1
-				var yy = 0
 				for (var i=0;i<m;i++){
 					var point = points[i]
 		        	var voxel = cubeMap[point.key]
-					yy = Math.abs(voxel.position.y + earth_raduis)
-					if (yy<10) {
+					if (!autoCamera && Math.abs(voxel.position.y + earth_raduis)<10) {
 							voxel.visible = true
 						}
 		        	if(voxel.userData != true){
 		         		voxel.position.add(downOne)
 		        	}
-		         	if(voxel.userData == true || yy<1){
+		         	if(voxel.userData == true || Math.abs(voxel.position.y + earth_raduis)<1){
 		        		var point2d = points2d[i]
 		        		//voxel.position.copy(point2d)
 		        		
