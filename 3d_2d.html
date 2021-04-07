@@ -36,7 +36,7 @@
 			var voxels = []
 			var earth_raduis = 180
 
-			var cubeMap={}
+			var cubeMap= {}
 			var objects=[]
 			var hilbert3DIt = 5
 
@@ -47,7 +47,7 @@
 
 
 			var it = Math.log(points.length)/Math.log(4)-1
-			var width = cubeLen*Math.sqrt(Math.pow(4,it+1))/2
+			var width = cubeLen*Math.sqrt(Math.pow(4,it+1)) * 10
 			var points2d = hilbert2D( new THREE.Vector3( 0, -180, 0 ), width, it )
 
 
@@ -60,7 +60,7 @@
 
 
 			init();
-			render();
+			//render();
 			//animate();
 			
 			
@@ -98,7 +98,7 @@
 
 
 
-				render();
+				//render();
 			}
 			function createInnerEarth(){
 				//createEarth
@@ -185,6 +185,7 @@
 					var x = point.x
 					var y = point.y
 					var z = point.z
+					point.key = x+":"+y+":"+z
 					var sqaure_dis = Math.pow(x,2)+Math.pow(y,2)+Math.pow(z,2)
 					var voxel = null
 					var add2Scene = true
@@ -203,11 +204,12 @@
 						voxel = new THREE.Mesh( cubeGeo, shellMaterial );
 						add2Scene = false
 					}
-					if(cubeMap[x+":"+y+":"+z]){//地壳已经包含
+					if(cubeMap[point.key]){//地壳已经包含
 						continue
 
 					}
 					if(voxel){
+						voxel.visible = false
 						voxel.position.set(x,y,z)
 						objects.push( voxel );
 						voxels.push(voxel)
@@ -215,7 +217,7 @@
 							scene.add( voxel );
 						}
 					}
-					cubeMap[x+":"+y+":"+z] = voxel
+					cubeMap[point.key] = voxel
 
 
 				}
@@ -226,7 +228,7 @@
 				
 				for(var i=0;i<points.length;i++){
 					var point = points[i]
-				
+					point.key = point['x']+":"+point['y']+":"+point['z']
 
 					var color = point['color']
 					var shellMaterial= new THREE.MeshPhongMaterial({
@@ -238,7 +240,7 @@
 					objects.push( voxel );
 					voxels.push(voxel)
 					scene.add( voxel );
-					cubeMap[point['x']+":"+point['y']+":"+point['z']] = voxel
+					cubeMap[point.key] = voxel
 				}
 				
 			}
@@ -309,7 +311,7 @@
 			function animate() {
 				//moveCube()
 				moveCube2Surface()
-				moveCamera()
+				//moveCamera()
 				if(worldTime>200){
 					r++
 
@@ -335,7 +337,7 @@
 					var point = points[i]
 		        	var point2d = points2d[i]
 
-		        	var voxel = cubeMap[point.x+":"+point.y+":"+point.z]
+		        	var voxel = cubeMap[point.key]
 
 					var step = new THREE.Vector3()
 
@@ -356,7 +358,7 @@
 			function moveCube2Surface(){
 				for (var i=0;i<points.length-1;i++){
 					var point = points[i]
-		        	var voxel = cubeMap[point.x+":"+point.y+":"+point.z]
+		        	var voxel = cubeMap[point.key]
 		        	if(voxel.userData!=true){
 		         		voxel.position.add(new THREE.Vector3(0,-1,0))
 
@@ -375,7 +377,7 @@
 
 			         	voxel.position.add(step)
 			         	voxel.userData = true
-
+						voxel.visible = true
 
 		         	}
 
