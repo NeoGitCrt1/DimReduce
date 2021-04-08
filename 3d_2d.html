@@ -286,16 +286,25 @@
 			var theta = 0
 			var alpha = 1
 			var r = 2200
+			var alphaStep = 0.01
 			function moveCamera(){
-				
+				if(worldTime>200){
+					r++
+				}
+					
+				if(worldTime>400){
+					r+=10
+					alpha+=alphaStep
+					if(alpha>(120*Math.PI)/180|| alpha<(10*Math.PI)/180){
+						alphaStep = -alphaStep
+					}
+
+				}
 				var cz = r*Math.sin(alpha)*Math.sin(theta)
 				var cx = r*Math.sin(alpha)*Math.cos(theta)
 				var cy = r*Math.cos(alpha)
 
 				theta-=0.01
-				
-
-				
 			
 				camera.position.set(cx,cy,cz)
 				camera.lookAt(0,-650,0)
@@ -306,7 +315,7 @@
 
 		
 			var worldTime = 0
-			var alphaStep = 0.01
+			
 			var autoCamera = false
 			function animate() {
 				
@@ -315,51 +324,53 @@
 				//rotateEarth() 
 				if (autoCamera) {
 					moveCamera()
-					if(worldTime>200){
-					r++
-
-					}
-
-					
-					if(worldTime>400){
-						r+=10
-						alpha+=alphaStep
-						if(alpha>(120*Math.PI)/180|| alpha<(10*Math.PI)/180){
-							alphaStep = -alphaStep
-						}
-
-					}
-
-					worldTime++
 				}
+
+				worldTime++
 				
 				
 				render();
 				requestAnimationFrame( animate );
 			}	
-			var quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),0.1);
-			var cosA = Math.cos(0.5);
-			var sinA = Math.sin(0.5);
+			var quaternion = new THREE.Quaternion();
+			var angle = 0.5
+			var cosA ;
+			var sinA ;
 			
 			function rotateEarth() {
-				var x , y
 				for (var i=0;i<points.length-1;i++){
 					var point = points[i]
-		        	
 		        	var voxel = cubeMap[point.key]
-					if (voxel.visible) {
-						x = voxel.position.x * cosA - voxel.position.z * sinA
-						y = voxel.position.z * cosA + voxel.position.x * sinA
-						voxel.position.x = x
-						voxel.position.z = y
-					}
-					
-
-					//voxel.applyQuaternion(quaternion)
-		         	
-
+					roll(voxel)
 		        }
 			}
+
+			var x, y
+			var cnt = 11
+			var axis = new THREE.Vector3(0,1,0)
+			function roll(voxel) {
+				// if (voxel.userData == true) {
+				// 	indexIn2d = 0;
+				// }
+				if (cnt > 10 ) {
+					angle = angle * (0.1/ angle)
+					cosA = Math.cos(angle);
+					sinA = Math.sin(angle);
+					quaternion.setFromAxisAngle(axis,angle);
+			
+					cnt = 0
+				}
+				if (voxel.visible) {
+					x = voxel.position.x * cosA + voxel.position.z * sinA
+					y = voxel.position.z * cosA - voxel.position.x * sinA
+					voxel.position.x = x
+					voxel.position.z = y
+					voxel.applyQuaternion(quaternion);
+				}
+				cnt++;
+					
+			}
+
 			function moveCube(){
 				for (var i=0;i<points.length-1;i++){
 					var point = points[i]
@@ -385,6 +396,7 @@
 
 			var step = new THREE.Vector3()
 			var downOne = new THREE.Vector3(0,-1,0)
+			
 			function moveCube2Surface(){
 				var m = points.length-1
 				for (var i=0;i<m;i++){
@@ -395,6 +407,7 @@
 						}
 		        	if(voxel.userData != true){
 		         		voxel.position.add(downOne)
+						 roll(voxel)
 		        	}
 		         	if(voxel.userData == true || Math.abs(voxel.position.y + earth_raduis)<1){
 		        		var point2d = points2d[i]
@@ -407,12 +420,7 @@
 						voxel.visible = true
 
 		         	}
-					 if (voxel.visible) {
-						x = voxel.position.x * cosA - voxel.position.z * sinA
-						y = voxel.position.z * cosA + voxel.position.x * sinA
-						voxel.position.x = x
-						voxel.position.z = y
-					}
+					// roll(voxel)
 
 		        }
 		       
